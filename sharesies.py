@@ -28,7 +28,7 @@ class Sharesies:
             json=login_form
         )
 
-        return r.status_code == 200
+        return r.json()['authenticated']
 
     def get_profile(self):
         '''
