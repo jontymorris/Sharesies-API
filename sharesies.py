@@ -16,7 +16,7 @@ class Sharesies:
         '''
         You must login first to access certain features
         '''
-        
+
         login_form = {
             'email': email,
             'password': password,
@@ -73,7 +73,7 @@ class Sharesies:
         )
 
         return r.status_code == 200
-    
+
     def sell(self, user, company, shares):
         '''
         Sell shares from the NZX Market
