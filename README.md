@@ -44,3 +44,18 @@ if s.sell(user_id, companies[0], 1):
 else:
   print('Something went wrong')
 ```
+
+## Historic price data
+```python
+>>> companies = s.get_companies()
+
+>>> s.get_price_history(companies[0])
+{
+    "2014-06-25": "1.110000",
+    "2014-06-30": "1.050000",
+    "2014-07-07": "1.050000",
+    "2014-07-10": "1.100000",
+    ...
+}
+
+```
