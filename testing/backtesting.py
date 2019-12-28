@@ -1,7 +1,7 @@
 from sharesies_api import sharesies
 import requests
 import os.path
-import json
+import pickle
 
 
 class Stock:
@@ -55,8 +55,6 @@ class Backtest(sharesies.Sharesies):
 
         self.wallet_ballence = wallet_ballence
 
-        self.cache_name = 'profile_cache.json'
-
         self.current_stocks = []
         self.sold_stocks = []
 
@@ -65,16 +63,26 @@ class Backtest(sharesies.Sharesies):
         Login if profile not cached
         '''
 
-        if not self._is_profile_cached():
+        # Cookies saved
+        if self.is_login_cached():
+            with open('cookie_cache.pk', 'rb') as f:
+                self.session.cookies.update(pickle.load(f))
+
+            return True
+
+        # Login and save cookies
+        else:
+
             logged_in = super().login(
                 email, password
             )
 
-            self.get_profile()  # cache
+            if logged_in:
+                with open('cookie_cache.pk', 'wb') as f:
+                    cookies = self.session.cookies
+                    pickle.dump(cookies, f)
 
             return logged_in
-
-        return True
 
     def sell(self, user, company, shares):
         '''
@@ -123,29 +131,19 @@ class Backtest(sharesies.Sharesies):
 
     def get_profile(self):
         '''
-        Returns profile data, saved to a cache
+        Returns modified profile data
         '''
 
-        cache_exists = self._is_profile_cached()
+        profile_data = super().get_profile()
 
-        # Cache exists
-        if cache_exists:
-            print('[!] Reading from cache :)')
-            with open(self.cache_name, 'r') as f:
-                profile_data = json.load(f)
-
-        # Make cache (requires login)
-        else:
-            print('[!] Creating cache')
-            profile_data = super().get_profile()
-
-            with open(self.cache_name, 'w') as f:
-                json.dump(profile_data, f)
-
-        # Fake our ballence
+        # Manipulate data...
         profile_data['user']['wallet_ballence'] = self.wallet_ballence
 
         return profile_data
 
-    def _is_profile_cached(self):
-        return os.path.exists(self.cache_name)
+    def is_login_cached(self):
+        '''
+        Checks if cookie cache exists
+        '''
+
+        return os.path.exists('cookie_cache.pk')

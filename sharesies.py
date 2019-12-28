@@ -1,4 +1,5 @@
 import requests
+from datetime import date
 
 
 class Sharesies:
@@ -53,6 +54,22 @@ class Sharesies:
         funds = r.json()['funds']
 
         return [fund for fund in funds if fund['fund_type'] == 'company']
+
+    def get_price_history(self, company):
+        '''
+        Returns daily price history for a company
+        '''
+
+        today = date.today()
+
+        r = self.session.get(
+            'https://app.sharesies.nz/api/fund/price-history?'
+            'fund_id={}&first={}&last={}'.format(
+                company['id'], '2000-01-01', today.strftime("%Y-%m-%d")
+            )
+        )
+
+        return r.json()['day_prices']
 
     def buy(self, user, company, amount):
         '''
