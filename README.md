@@ -5,7 +5,7 @@ Unoffical Python API for Sharesies NZ
 # Documentation
 
 ## Installing
-``pip install git+ssh://git@github.com:jontymorris/Sharesies-API.git``
+``pip install git+ssh://git@github.com/jontymorris/Sharesies-API.git``
 
 ## Logging in
 ```python
