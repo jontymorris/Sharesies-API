@@ -8,7 +8,6 @@ Unoffical Python API for Sharesies NZ
 ```python
 import sharesies
 
-
 s = sharesies.Sharesies()
 
 if s.login('you@example.com', 'password123'):

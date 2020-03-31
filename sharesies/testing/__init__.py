@@ -1,7 +1,7 @@
-from sharesies_api import sharesies
-import requests
 import os.path
+import requests
 import pickle
+import sharesies
 
 
 class Stock:
