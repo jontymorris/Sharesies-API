@@ -11,9 +11,9 @@ Unoffical Python API for Sharesies NZ
 ```python
 import sharesies
 
-s = sharesies.Sharesies()
+client = sharesies.Client()
 
-if s.login('you@example.com', 'password123'):
+if client.login('you@example.com', 'password123'):
   print('Login succeeded')
 else:
   print('Login failed')
@@ -21,7 +21,7 @@ else:
 
 ## Profile information
 ```python
-profile = s.get_profile()
+profile = client.get_profile()
 
 user_id = profile['user']['id']
 portfolio = profile['portfolio']
@@ -29,9 +29,9 @@ portfolio = profile['portfolio']
 
 ## Buying shares
 ```python
-companies = s.get_companies()
+companies = client.get_companies()
 
-if s.buy(user_id, companies[0], 10):
+if client.buy(companies[0], 10):
   print('Bought $10 worth of shares')
 else:
   print('Something went wrong')
@@ -39,9 +39,9 @@ else:
 
 ## Selling shares
 ```python
-companies = s.get_companies()
+companies = client.get_companies()
 
-if s.sell(user_id, companies[0], 1):
+if client.sell(companies[0], 1):
   print('Sold 1 share')
 else:
   print('Something went wrong')
@@ -49,9 +49,9 @@ else:
 
 ## Historic price data
 ```python
->>> companies = s.get_companies()
+>>> companies = client.get_companies()
 
->>> s.get_price_history(companies[0])
+>>> client.get_price_history(companies[0])
 {
     "2014-06-25": "1.110000",
     "2014-06-30": "1.050000",
