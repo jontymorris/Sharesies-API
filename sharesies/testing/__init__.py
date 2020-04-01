@@ -42,7 +42,7 @@ class Stock:
         return None
 
 
-class Backtest(sharesies.Sharesies):
+class Backtest(sharesies.Client):
     '''
     Clone of the Sharesies class
     except without making any purchases
@@ -84,7 +84,7 @@ class Backtest(sharesies.Sharesies):
 
             return logged_in
 
-    def sell(self, user, company, shares):
+    def sell(self, company, shares):
         '''
         Pretend to sell stocks
         '''
@@ -114,7 +114,7 @@ class Backtest(sharesies.Sharesies):
             print("[!] Tried to sell stock that didn't exist!")
             return False
 
-    def buy(self, user, company, amount):
+    def buy(self, company, amount):
         '''
         Pretend to buy stocks
         '''
@@ -123,8 +123,8 @@ class Backtest(sharesies.Sharesies):
             company['name'],
             amount
         )
-        self.current_stocks.append(purchased_stock)
 
+        self.current_stocks.append(purchased_stock)
         self.wallet_ballence -= amount
 
         return True
