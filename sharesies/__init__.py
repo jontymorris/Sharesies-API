@@ -2,7 +2,7 @@ import requests
 from datetime import date
 
 
-class Sharesies:
+class Client:
 
     def __init__(self):
         # session to remain logged in
@@ -29,7 +29,9 @@ class Sharesies:
             json=login_form
         )
 
-        return r.json()['authenticated']
+        self.profile = r.json()['authenticated']
+
+        return self.profile
 
     def get_profile(self):
         '''
@@ -71,17 +73,17 @@ class Sharesies:
 
         return r.json()['day_prices']
 
-    def buy(self, user, company, amount):
+    def buy(self, company, amount):
         '''
         Purchase stocks from the NZX Market
         '''
 
         buy_info = {
-            'acting_as_id': user,
             'action': 'place',
             'amount': amount,
+            'fund_id': company['id'],
             'expected_fee': amount*0.005,
-            'fund_id': company['id']
+            'acting_as_id': self.profile['user']['id']
         }
 
         r = self.session.post(
@@ -91,15 +93,15 @@ class Sharesies:
 
         return r.status_code == 200
 
-    def sell(self, user, company, shares):
+    def sell(self, company, shares):
         '''
         Sell shares from the NZX Market
         '''
 
         sell_info = {
-            'acting_as_id': user,
+            'shares': shares,
             'fund_id': company['id'],
-            'shares': shares
+            'acting_as_id': self.profile['user']['id'],
         }
 
         r = self.session.post(
