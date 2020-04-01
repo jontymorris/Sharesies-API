@@ -1,7 +1,7 @@
 import os.path
 import requests
 import pickle
-import sharesies
+from .client import Client
 
 
 class Stock:
@@ -42,7 +42,7 @@ class Stock:
         return None
 
 
-class Backtest(sharesies.Client):
+class Backtest(Client):
     '''
     Clone of the Sharesies class
     except without making any purchases
