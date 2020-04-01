@@ -59,5 +59,13 @@ else:
     "2014-07-10": "1.100000",
     ...
 }
+```
 
+## Testing
+```python
+import sharesies
+
+# use this for pretend transactions
+client = sharesies.Backtest()
+print(client.wallet_ballence)
 ```
