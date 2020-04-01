@@ -27,11 +27,13 @@ class Client:
         r = self.session.post(
             'https://app.sharesies.nz/api/identity/login',
             json=login_form
-        )
+        ).json()
 
-        self.profile = r.json()['authenticated']
-
-        return self.profile
+        if r['authenticated']:
+            self.user_id = r['user_list'][0]['id']
+            return True
+        
+        return False
 
     def get_profile(self):
         '''
@@ -83,7 +85,7 @@ class Client:
             'amount': amount,
             'fund_id': company['id'],
             'expected_fee': amount*0.005,
-            'acting_as_id': self.profile['user']['id']
+            'acting_as_id': self.user_id
         }
 
         r = self.session.post(
@@ -101,7 +103,7 @@ class Client:
         sell_info = {
             'shares': shares,
             'fund_id': company['id'],
-            'acting_as_id': self.profile['user']['id'],
+            'acting_as_id': self.user_id,
         }
 
         r = self.session.post(
