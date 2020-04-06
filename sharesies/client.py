@@ -102,7 +102,7 @@ class Client:
 
         sell_info = {
             'shares': shares,
-            'fund_id': company['id'],
+            'fund_id': company['fund_id'],
             'acting_as_id': self.user_id,
         }
 
