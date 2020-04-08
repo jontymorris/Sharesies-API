@@ -31,6 +31,7 @@ class Client:
 
         if r['authenticated']:
             self.user_id = r['user_list'][0]['id']
+            self.password = password # Used for reauth
             return True
         
         return False
@@ -80,6 +81,8 @@ class Client:
         Purchase stocks from the NZX Market
         '''
 
+        self.reauth() # Avoid timeout
+
         buy_info = {
             'action': 'place',
             'amount': amount,
@@ -100,6 +103,8 @@ class Client:
         Sell shares from the NZX Market
         '''
 
+        self.reauth() # Avoid timeout
+
         sell_info = {
             'shares': shares,
             'fund_id': company['fund_id'],
@@ -112,3 +117,21 @@ class Client:
         )
 
         return r.status_code == 200
+
+    def reauth(self):
+        '''
+        Reauthenticates user on server
+        '''
+
+        creds = {
+            "password": self.password,
+            "acting_as_id": self.user_id
+        }
+
+        r = self.session.post(
+            'https://app.sharesies.nz/api/identity/reauthenticate',
+            json=creds
+        )
+
+        return r.status_code == 200
+        
