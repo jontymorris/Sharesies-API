@@ -13,6 +13,10 @@ class Client:
             "content-type": "application/json",
         }
 
+        self.user_id = ""
+        self.password = ""
+        self.auth_token = ""
+
     def login(self, email, password):
         '''
         You must login first to access certain features
@@ -32,9 +36,57 @@ class Client:
         if r['authenticated']:
             self.user_id = r['user_list'][0]['id']
             self.password = password # Used for reauth
+            self.auth_token = r['distill_token']
             return True
         
         return False
+
+    def get_shares(self):
+        '''
+        Get all shares listed on Sharesies
+        '''
+
+        shares = []
+        current_page = 1
+
+        while True:
+            page = self.get_instruments(current_page)
+            shares += page['instruments']
+
+            if current_page >= page['numberOfPages']:
+                break
+
+            current_page += 1
+
+        return shares
+
+    def get_instruments(self, page):
+        '''
+        Get a certain page of shares
+        '''
+        headers = self.session.headers
+        headers['Authorization'] = f'Bearer {self.auth_token}'
+
+        params = {
+            'Page': page,
+            'Sort': 'marketCap',
+            'PriceChangeTime': '1y',
+            'Query': ''
+        }
+
+        r = self.session.get("https://data.sharesies.nz/api/v1/instruments",
+                             params=params, headers=headers)
+        return r.json()
+
+    def get_info(self):
+        '''
+        Get basic market info
+        '''
+        headers = self.session.headers
+        headers['Authorization'] = f'Bearer {self.auth_token}'
+
+        r = self.session.get("https://data.sharesies.nz/api/v1/instruments/info")
+        return r.text
 
     def get_profile(self):
         '''
@@ -46,19 +98,6 @@ class Client:
         )
 
         return r.json()
-
-    def get_companies(self):
-        '''
-        Returns all companies accessible through Sharesies
-        '''
-
-        r = self.session.get(
-            'https://app.sharesies.nz/api/fund/list'
-        )
-
-        funds = r.json()['funds']
-
-        return [fund for fund in funds if fund['fund_type'] == 'company']
 
     def get_price_history(self, company):
         '''
@@ -81,7 +120,7 @@ class Client:
         Purchase stocks from the NZX Market
         '''
 
-        self.reauth() # Avoid timeout
+        self.reauth() # avoid timeout
 
         buy_info = {
             'action': 'place',
