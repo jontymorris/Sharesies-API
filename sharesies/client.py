@@ -78,6 +78,19 @@ class Client:
                              params=params, headers=headers)
         return r.json()
 
+    def get_companies(self):
+        '''
+        Returns all companies accessible through Sharesies
+        '''
+
+        r = self.session.get(
+            'https://app.sharesies.nz/api/fund/list'
+        )
+
+        funds = r.json()['funds']
+
+        return [fund for fund in funds if fund['fund_type'] == 'company']
+
     def get_info(self):
         '''
         Get basic market info
