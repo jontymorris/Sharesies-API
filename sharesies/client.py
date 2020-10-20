@@ -1,5 +1,7 @@
 import requests
 from datetime import date
+from threading import Thread
+from queue import Queue
 
 
 class Client:
@@ -47,17 +49,32 @@ class Client:
         '''
 
         shares = []
-        current_page = 1
 
-        while True:
-            page = self.get_instruments(current_page)
-            shares += page['instruments']
+        page = self.get_instruments(1)
+        number_of_pages = page['numberOfPages']
+        shares += page['instruments']
 
-            if current_page >= page['numberOfPages']:
-                break
+        threads = []
+        que = Queue() 
 
-            current_page += 1
+        # make threads
+        for i in range(2, number_of_pages):
+            threads.append(Thread(
+                target=lambda q,
+                arg1: q.put(self.get_instruments(arg1)),
+                args=(que, i)))
+        
+        # start threads
+        for thread in threads:
+            thread.start()
 
+        # join threads
+        for thread in threads:
+            thread.join()
+            
+        while not que.empty():
+            shares += que.get()['instruments']
+    
         return shares
 
     def get_instruments(self, page):
