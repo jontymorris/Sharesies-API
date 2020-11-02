@@ -73,7 +73,7 @@ class Client:
             thread.join()
             
         while not que.empty():
-            shares += que.get()['instruments']
+            shares += que.get()
     
         return shares
 
@@ -93,7 +93,44 @@ class Client:
 
         r = self.session.get("https://data.sharesies.nz/api/v1/instruments",
                              params=params, headers=headers)
-        return r.json()
+        responce = r.json()
+
+        # get dividends and price history
+        for i in range(len(responce)):
+            responce['instruments'][i]['dividends'] = self.get_dividends(
+                responce['instruments'][i]['id'])
+            responce['instruments'][i]['priceHistory'] = self.get_price_history(
+                responce['instruments'][i]['id'])
+        
+        return responce
+
+    def get_dividends(self, share_id):
+        '''
+        Get certain stocks dividends
+        '''
+
+        headers = self.session.headers
+        headers['Authorization'] = f'Bearer {self.auth_token}'
+
+        r = self.session.get(
+            "https://data.sharesies.nz/api/v1/instruments/"
+            f"{share_id}/dividends")
+
+        return r.json()['dividends']
+
+    def get_price_history(self, share_id):
+        '''
+        Get certain stocks price history
+        '''
+
+        headers = self.session.headers
+        headers['Authorization'] = f'Bearer {self.auth_token}'
+
+        r = self.session.get(
+            "https://data.sharesies.nz/api/v1/instruments/"
+            f"{share_id}/pricehistory")
+
+        return r.json()['dayPrices']
 
     def get_companies(self):
         '''
@@ -129,10 +166,8 @@ class Client:
 
         return r.json()
 
+    '''
     def get_price_history(self, company):
-        '''
-        Returns daily price history for a company
-        '''
 
         today = date.today()
 
@@ -144,6 +179,7 @@ class Client:
         )
 
         return r.json()['day_prices']
+    '''
 
     def buy(self, company, amount):
         '''
