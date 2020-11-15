@@ -73,7 +73,7 @@ class Client:
             thread.join()
             
         while not que.empty():
-            shares += que.get()
+            shares += que.get()['instruments']
     
         return shares
 
@@ -96,11 +96,10 @@ class Client:
         responce = r.json()
 
         # get dividends and price history
-        for i in range(len(responce)):
-            responce['instruments'][i]['dividends'] = self.get_dividends(
-                responce['instruments'][i]['id'])
-            responce['instruments'][i]['priceHistory'] = self.get_price_history(
-                responce['instruments'][i]['id'])
+        for i in range(len(responce['instruments'])):
+            id_ = responce['instruments'][i]['id']
+            #responce['instruments'][i]['dividends'] = self.get_dividends(id_)
+            responce['instruments'][i]['priceHistory'] = self.get_price_history(id_)
         
         return responce
 
@@ -116,6 +115,7 @@ class Client:
             "https://data.sharesies.nz/api/v1/instruments/"
             f"{share_id}/dividends")
 
+        # TODO: Clean up output
         return r.json()['dividends']
 
     def get_price_history(self, share_id):
