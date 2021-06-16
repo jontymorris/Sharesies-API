@@ -43,14 +43,14 @@ class Client:
         
         return False
 
-    def get_shares(self):
+    def get_shares(self, managed_funds=False):
         '''
         Get all shares listed on Sharesies
         '''
 
         shares = []
 
-        page = self.get_instruments(1)
+        page = self.get_instruments(1, managed_funds)
         number_of_pages = page['numberOfPages']
         shares += page['instruments']
 
@@ -61,7 +61,7 @@ class Client:
         for i in range(2, number_of_pages):
             threads.append(Thread(
                 target=lambda q,
-                arg1: q.put(self.get_instruments(arg1)),
+                arg1: q.put(self.get_instruments(arg1, managed_funds)),
                 args=(que, i)))
         
         # start threads
@@ -77,7 +77,7 @@ class Client:
     
         return shares
 
-    def get_instruments(self, page):
+    def get_instruments(self, page, managed_funds=False):
         '''
         Get a certain page of shares
         '''
@@ -90,6 +90,9 @@ class Client:
             'PriceChangeTime': '1y',
             'Query': ''
         }
+        
+        if managed_funds:
+            params['instrumentTypes'] = ['mf']
 
         r = self.session.get("https://data.sharesies.nz/api/v1/instruments",
                              params=params, headers=headers)
