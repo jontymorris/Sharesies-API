@@ -30,18 +30,49 @@ class Client:
             'remember': True
         }
 
-        r = self.session.post(
+        resp = self.session.post(
             'https://app.sharesies.nz/api/identity/login',
             json=login_form
-        ).json()
+        )
+
+        r = resp.json()
 
         if r['authenticated']:
             self.user_id = r['user_list'][0]['id']
             self.password = password # Used for reauth
             self.auth_token = r['distill_token']
+            self.session_cookie = resp.cookies['session']
             return True
         
         return False
+
+    def get_transactions(self, since=0):
+        '''
+        Get all transactions in wallet since a certain transaction_id (0 is all-time)
+        '''
+
+        transactions = []
+
+        cookies = {
+            'session': self.session_cookie
+        }
+
+        params = {
+            'limit': 50,
+            'acting_as_id': self.user_id,
+            'since': since
+        }
+
+        has_more = True
+        while has_more:
+            r = self.session.get("https://app.sharesies.nz/api/accounting/transaction-history",
+                                 params=params, cookies=cookies)
+            responce = r.json()
+            transactions.extend(responce['transactions'])
+            has_more = responce['has_more']
+            params['before'] = transactions[-1]['transaction_id']
+
+        return transactions
 
     def get_shares(self, managed_funds=False):
         '''
