@@ -49,9 +49,9 @@ else:
 
 ## Historic price data
 ```python
->>> companies = client.get_companies()
+companies = client.get_companies()
 
->>> client.get_price_history(companies[0])
+client.get_price_history(companies[0])
 {
     "2014-06-25": "1.110000",
     "2014-06-30": "1.050000",
@@ -59,6 +59,26 @@ else:
     "2014-07-10": "1.100000",
     ...
 }
+```
+
+## Your order history
+```python
+# get your portfolio
+profile = client.get_profile()
+portfolio = profile['portfolio']
+
+# loop through your portfolio
+for item in portfolio:
+  fund_id = item['fund_id']
+  order_history = client.get_order_history(fund_id)
+  
+  '''
+  each item has:
+    type: buy/sell
+    contribution: amount buy/sold
+    order_unit_price: price at time
+    created: Unix timestamp
+  '''
 ```
 
 ## Testing
