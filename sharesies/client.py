@@ -219,20 +219,19 @@ class Client:
 
         return r.json()
 
-    '''
-    def get_price_history(self, company):
+    def get_order_history(self, fund_id):
+        '''
+        Returns your order history for a given fund.
+        '''
 
-        today = date.today()
+        self.reauth() # Avoid timeout
 
         r = self.session.get(
-            'https://app.sharesies.nz/api/fund/price-history?'
-            'fund_id={}&first={}&last={}'.format(
-                company['id'], '2000-01-01', today.strftime("%Y-%m-%d")
-            )
+            'https://app.sharesies.nz/api/accounting/order-history-v4' +
+            '?fund_id=' + fund_id + '&acting_as_id=' + self.user_id
         )
 
-        return r.json()['day_prices']
-    '''
+        return r.json()['orders']
 
     def buy(self, company, amount):
         '''
