@@ -109,7 +109,7 @@ class Client:
 
         # make threads
         for i in range(2, number_of_pages):
-            threads.append(PropogatingThread(
+            threads.append(PropagatingThread(
                 target=lambda q,
                 arg1: q.put(self.get_instruments(arg1, managed_funds)),
                 args=(que, i)))
