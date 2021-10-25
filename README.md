@@ -81,11 +81,14 @@ for item in portfolio:
   '''
 ```
 
-## Testing
-```python
-import sharesies
+<hr>
 
-# use this for pretend transactions
-client = sharesies.Backtest()
-print(client.wallet_ballence)
+## Development
+
+To setup a development environment you can install the package in [development mode](https://packaging.python.org/tutorials/installing-packages/#installing-from-vcs).
+
+```bash
+git clone https://github.com/jontymorris/Sharesies-API.git
+cd Sharesies-API
+python3 -m pip install -e .
 ```

@@ -1,26 +1,6 @@
 import requests
-from datetime import date
-from threading import Thread
+from sharesies.util import PropagatingThread
 from queue import Queue
-
-# From https://stackoverflow.com/a/31614591
-class PropagatingThread(Thread):
-    def run(self):
-        self.exc = None
-        try:
-            if hasattr(self, '_Thread__target'):
-                # Thread uses name mangling prior to Python 3.
-                self.ret = self._Thread__target(*self._Thread__args, **self._Thread__kwargs)
-            else:
-                self.ret = self._target(*self._args, **self._kwargs)
-        except BaseException as e:
-            self.exc = e
-
-    def join(self, timeout=None):
-        super(PropagatingThread, self).join(timeout)
-        if self.exc:
-            raise self.exc
-        return self.ret
 
 
 class Client:
@@ -58,16 +38,17 @@ class Client:
 
         if r['authenticated']:
             self.user_id = r['user_list'][0]['id']
-            self.password = password # Used for reauth
+            self.password = password  # Used for reauth
             self.auth_token = r['distill_token']
             self.session_cookie = resp.cookies['session']
             return True
-        
+
         return False
 
     def get_transactions(self, since=0):
         '''
-        Get all transactions in wallet since a certain transaction_id (0 is all-time)
+        Get all transactions in wallet since a certain transaction_id
+        (0 is all-time)
         '''
 
         transactions = []
@@ -84,8 +65,9 @@ class Client:
 
         has_more = True
         while has_more:
-            r = self.session.get("https://app.sharesies.nz/api/accounting/transaction-history",
-                                 params=params, cookies=cookies)
+            r = self.session.get(
+                "https://app.sharesies.nz/api/accounting/transaction-history",
+                params=params, cookies=cookies)
             responce = r.json()
             transactions.extend(responce['transactions'])
             has_more = responce['has_more']
@@ -105,7 +87,7 @@ class Client:
         shares += page['instruments']
 
         threads = []
-        que = Queue() 
+        que = Queue()
 
         # make threads
         for i in range(2, number_of_pages):
@@ -113,7 +95,7 @@ class Client:
                 target=lambda q,
                 arg1: q.put(self.get_instruments(arg1, managed_funds)),
                 args=(que, i)))
-        
+
         # start threads
         for thread in threads:
             thread.start()
@@ -121,10 +103,10 @@ class Client:
         # join threads
         for thread in threads:
             thread.join()
-            
+
         while not que.empty():
             shares += que.get()['instruments']
-    
+
         return shares
 
     def get_instruments(self, page, managed_funds=False):
@@ -140,7 +122,7 @@ class Client:
             'PriceChangeTime': '1y',
             'Query': ''
         }
-        
+
         if managed_funds:
             params['instrumentTypes'] = ['mf']
 
@@ -150,10 +132,11 @@ class Client:
 
         # get dividends and price history
         for i in range(len(responce['instruments'])):
-            id_ = responce['instruments'][i]['id']
-            #responce['instruments'][i]['dividends'] = self.get_dividends(id_)
-            responce['instruments'][i]['priceHistory'] = self.get_price_history(id_)
-        
+            current = responce['instruments'][i]
+            id_ = current['id']
+            # current['dividends'] = self.get_dividends(id_)
+            current['priceHistory'] = self.get_price_history(id_)
+
         return responce
 
     def get_dividends(self, share_id):
@@ -205,7 +188,8 @@ class Client:
         headers = self.session.headers
         headers['Authorization'] = f'Bearer {self.auth_token}'
 
-        r = self.session.get("https://data.sharesies.nz/api/v1/instruments/info")
+        r = self.session.get(
+            "https://data.sharesies.nz/api/v1/instruments/info")
         return r.text
 
     def get_profile(self):
@@ -224,7 +208,7 @@ class Client:
         Returns your order history for a given fund.
         '''
 
-        self.reauth() # Avoid timeout
+        self.reauth()  # Avoid timeout
 
         r = self.session.get(
             'https://app.sharesies.nz/api/accounting/order-history-v4' +
@@ -238,7 +222,7 @@ class Client:
         Purchase stocks from the NZX Market
         '''
 
-        self.reauth() # avoid timeout
+        self.reauth()  # avoid timeout
 
         buy_info = {
             'action': 'place',
@@ -260,7 +244,7 @@ class Client:
         Sell shares from the NZX Market
         '''
 
-        self.reauth() # Avoid timeout
+        self.reauth()  # Avoid timeout
 
         sell_info = {
             'shares': shares,
@@ -291,4 +275,3 @@ class Client:
         )
 
         return r.status_code == 200
-        
