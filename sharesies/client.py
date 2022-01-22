@@ -149,6 +149,25 @@ class Client:
 
         return responce
 
+    def get_instrument(self, fund_id):
+        '''
+        Get a certain fund by id
+        '''
+
+        self.reauth()
+        
+        fund_info = {
+            'fund_id': fund_id,
+            'acting_as_id': self.user_id,
+        }
+
+        r = self.session.post(
+            'https://app.sharesies.nz/api/identity/set-searched-fund',
+            json=fund_info
+        )
+
+        return r.json()
+
     def get_dividends(self, share_id):
         '''
         Get certain stocks dividends
