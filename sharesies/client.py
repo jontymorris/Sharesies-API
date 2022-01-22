@@ -44,6 +44,16 @@ class Client:
             return True
 
         return False
+    
+    def logout(self):
+        '''
+        Clears the login session data
+        '''
+
+        self.user_id = None
+        self.password = None
+        self.auth_token = None
+        self.session_cookie = None
 
     def get_transactions(self, since=0):
         '''
