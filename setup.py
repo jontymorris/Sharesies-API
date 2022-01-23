@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='sharesies',
-    version='1.3.2',
+    version='1.3.3',
     description='Unoffical Python API for Sharesies NZ',
     url='https://github.com/jontymorris/Sharesies-API',
     author='Jonty Morris',
