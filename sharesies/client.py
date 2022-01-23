@@ -123,6 +123,7 @@ class Client:
         '''
         Get a certain page of shares
         '''
+
         headers = self.session.headers
         headers['Authorization'] = f'Bearer {self.auth_token}'
 
@@ -151,22 +152,23 @@ class Client:
 
     def get_instrument(self, fund_id):
         '''
-        Get a certain fund by id
+        Get a certain share
         '''
-
-        self.reauth()
         
-        fund_info = {
-            'fund_id': fund_id,
-            'acting_as_id': self.user_id,
-        }
+        headers = self.session.headers
+        headers['Authorization'] = f'Bearer {self.auth_token}'
 
-        r = self.session.post(
-            'https://app.sharesies.nz/api/identity/set-searched-fund',
-            json=fund_info
-        )
+        r = self.session.get(
+            f'https://data.sharesies.nz/api/v1/instruments/{fund_id}',
+            headers=headers)
+        
+        response = r.json()
 
-        return r.json()
+        # get dividends and price history
+        # response['dividends'] = self.get_dividends(fund_id)
+        response['priceHistory'] = self.get_price_history(fund_id)
+
+        return response
 
     def get_dividends(self, share_id):
         '''
