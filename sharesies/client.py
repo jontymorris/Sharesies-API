@@ -17,6 +17,7 @@ class Client:
         self.user_id = ""
         self.password = ""
         self.auth_token = ""
+        self.rakaia_token = ""
 
     def login(self, email, password):
         '''
@@ -40,6 +41,7 @@ class Client:
             self.user_id = r['user_list'][0]['id']
             self.password = password  # Used for reauth
             self.auth_token = r['distill_token']
+            self.rakaia_token = r['rakaia_token']
             self.session_cookie = resp.cookies['session']
             return True
 
@@ -230,6 +232,20 @@ class Client:
 
         r = self.session.get(
             'https://app.sharesies.nz/api/identity/check'
+        )
+
+        return r.json()
+
+    def get_portfolio(self, portfolio_id):
+        '''
+        Returns the portfolio of a user
+        '''
+
+        headers = self.session.headers
+        headers['Authorization'] = f'Bearer {self.rakaia_token}'
+
+        r = self.session.get(
+            f'https://portfolio.sharesies.nz/api/v1/portfolios/{portfolio_id}'
         )
 
         return r.json()
